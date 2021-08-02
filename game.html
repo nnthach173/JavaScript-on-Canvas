@@ -3,26 +3,28 @@
 <canvas id="gameCanvas" width="800" height="600"></canvas>
 
 <script>
-var canvas;
-var canvasContext;
-var ballX = 50;
-var ballY = 50;
-var ballSpeedX = 10;
+//variables
+var canvas; // everything that is inside "canvas"
+var canvasContext; // graphical information: rectangle, drawing, images,...
+var ballX = 50; // postion of the ball
+var ballY = 50; 
+var ballSpeedX = 10; //speed of the ball
 var ballSpeedY = 4;
 
-var player1Score = 0;
-var player2Score = 0;
-const WINNING_SCORE = 3;
+var player1Score = 0; //player 1 score
+var player2Score = 0; //player 2 (AI) score
+const WINNING_SCORE = 3; //score need to win
 
-var showingWinningScreen = false;
+var showingWinScreen = false;
 
-var paddle1Y = 250;
+var paddle1Y = 250; //position of paddles
 var paddle2Y = 250;
-const PADDLE_THICKNESS = 10;
+const PADDLE_THICKNESS = 10; 
 const PADDLE_HEIGHT = 100;
 
+//find the mouse position relative to game canvas
 function calculateMousePos(evt) {
-	var rect = canvas.getBoundingClientRect();
+	var rect = canvas.getBoundingClientRect(); //area on the canvas
 	var root = document.documentElement;
 	var mouseX = evt.clientX - rect.left - root.scrollLeft;
 	var mouseY = evt.clientY - rect.top - root.scrollTop;
@@ -31,11 +33,11 @@ function calculateMousePos(evt) {
 		y:mouseY
 	};
 }
-function handleMouseClick(evt) {
-	if(showingWinningScreen) {
-			player1Score = 0;
+function handleMouseClick(evt) { //click the mouse when the winning screen is being displayed
+	if(showingWinScreen) {   
+			player1Score = 0; //reset score of both players
 			player2Score = 0;
-			showingWinningScreen = false;
+			showingWinScreen = false; //turn off the winning screen
 	}
 }
 
@@ -44,7 +46,7 @@ window.onload = function() {
 	canvasContext = canvas.getContext('2d');
 	
 	var framesPerSecond = 30;
-	setInterval(function() {
+	setInterval(function() {  //set a time interval
 		moveEverything();
 		drawEverything();
 	}, 1000/framesPerSecond);
@@ -54,32 +56,32 @@ window.onload = function() {
 	canvas.addEventListener('mousemove',
 		function(evt) {
 			var mousePos = calculateMousePos(evt);
-			paddle1Y = mousePos.y -(PADDLE_HEIGHT/2);
+			paddle1Y = mousePos.y -(PADDLE_HEIGHT/2); //controlling the left paddle
 		});
 }
 
-function ballReset() {
+function ballReset() { //resets the ball if one player reaches the winning score
 	if(player1Score >= WINNING_SCORE ||
 	   player2Score >= WINNING_SCORE) {
-			showingWinningScreen = true;
+			showingWinScreen = true; //show the winning screen
 }
 
-	ballSpeedX = -ballSpeedX;
-	ballX = canvas.width/2;
+	ballSpeedX = -ballSpeedX; 
+	ballX = canvas.width/2; //position of the ball after reset
 	ballY = canvas.height/2;
 }
 
 function computerMovement() {
 	var paddle2YCenter = paddle2Y + (PADDLE_HEIGHT/2);
-	if(paddle2YCenter < ballY-35) {
+	if(paddle2YCenter < ballY-35) { //AI tracks the movement of the ball. If ballY goes up > paddle goes up at 6 speed
 		paddle2Y += 6;
 	} else if (paddle2YCenter > ballY+35) {
-		paddle2Y -= 6;
+		paddle2Y -= 6; //If ballY goes down > paddle goes down at 6 speed
 	}
 }
 
 function moveEverything() {
-	if(showingWinningScreen) {
+	if(showingWinScreen) { //show Win screen
 		return;
 	}
 	
@@ -91,39 +93,41 @@ function moveEverything() {
 	if(ballX < 0) {
 			if(ballY > paddle1Y &&
 				ballY < paddle1Y+PADDLE_HEIGHT) {
-					ballSpeedX = -ballSpeedX;
+					ballSpeedX = -ballSpeedX; //if ball touches the paddle > reflect the ball
 					
 					var deltaY = ballY
 						-(paddle1Y+PADDLE_HEIGHT/2);
 					ballSpeedY = deltaY * 0.35;
 			} else {
 			player2Score++;
-			ballReset();
+			ballReset(); //if you miss the ball > reset the ball position + 1 score for other player
 			}
 	}
-	if(ballX > canvas.width) {
+	if(ballX > canvas.width) { //if ballX goes out of the border (canvas.width)
 			if(ballY > paddle2Y &&
 				ballY < paddle2Y+PADDLE_HEIGHT) {
-					ballSpeedX = -ballSpeedX;
+					ballSpeedX = -ballSpeedX; //if it hits the paddle > reflect
 					var deltaY = ballY
 						-(paddle2Y+PADDLE_HEIGHT/2);
 					ballSpeedY = deltaY * 0.35;
 			} else {
 			player1Score++ //must be before ball reset
-			ballReset();
+			ballReset(); //if it does not hit the paddle > give 1 score > reset the ball
 			}
 	}
 	if(ballY < 0) {
-			ballSpeedY = -ballSpeedY;
+			ballSpeedY = -ballSpeedY; //ball touches the border > bounces back
 	}
 	if(ballY > canvas.height) {
-			ballSpeedY = -ballSpeedY;
+			ballSpeedY = -ballSpeedY; // same ^
 	}
 }
 
 function drawNet() {
-	for(var i=0; i<canvas.height; i+=40) {
-		colorRect(canvas.width/2-1,i,2,20,'white');
+	for(var i=0; i<canvas.height; i+=40) { //start variable at 0, count up 40 pixels at a time, each 
+		colorRect(canvas.width/2-1,i,2,20,'white'); //draw a net at middle of the screen
+		
+	//(positionX,i,net thickess, net height, net color)
 	}
 }
 
@@ -131,7 +135,7 @@ function drawEverything() {
 	//next line blanks out the screen with black
 	colorRect(0,0,canvas.width,canvas.height,'black');
 	
-	if(showingWinningScreen) {
+	if(showingWinScreen) {
 		canvasContext.fillStyle = 'white';
 		if(player1Score >= WINNING_SCORE) {
 		canvasContext.fillText("Left Player Won!", 350,200);
